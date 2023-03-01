@@ -1,0 +1,109 @@
+---
+title: "ShootingRmd"
+author: "A. K. Attri"
+date: "2022-12-27"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-packages}
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+```
+## Importing NYPD Shooting Dataset
+
+I will start by reading in the data from the csv files.
+
+```{r set_nypd_shooting_data_url}
+url <- "https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD"
+```
+
+Let's read in the data and explore it
+```{r import_data, message=FALSE}
+nypd_shooting_data <- read_csv(url)
+```
+
+Now that I have explored the data, I would tidy it and store total shooting cases per year and total murder cases per year in a separate data frame. I will only keep year and count data and remove all other columns from it.
+
+```{r tidy_cases_data}
+## Get total shooting cases per year
+total_shooting_cases_per_year <- nypd_shooting_data %>% count(OCCUR_DATE, name = "value") %>%
+mutate(OCCUR_DATE = mdy(OCCUR_DATE)) %>%
+mutate(month = format(OCCUR_DATE, "%m"), year = format(OCCUR_DATE, "%Y")) %>%
+group_by(year) %>%
+summarise(total_shooting_cases = sum(value))
+total_shooting_cases_per_year
+
+## On analyzing the total shooting cases per year we found that max recorded cases were 2055 in the year 2006 and min cases were 958 in the year 2018. On avg 1600 cases were recorded per year from 2006 to 2021
+summary(total_shooting_cases_per_year)
+
+## Get total murder cases per year
+total_murder_cases_per_year <- nypd_shooting_data %>% filter(STATISTICAL_MURDER_FLAG == TRUE) %>% count(OCCUR_DATE, name = "value") %>%
+mutate(OCCUR_DATE = mdy(OCCUR_DATE)) %>%
+mutate(month = format(OCCUR_DATE, "%m"), year = format(OCCUR_DATE, "%Y")) %>%
+group_by(year) %>%
+summarise(total_murder_cases = sum(value))
+total_murder_cases_per_year
+
+## On analyzing the total murder cases per year we found that max recorded cases were 445 in the year 2006 and min cases were 174 in the year 2017. On avg 308 cases were recorded per year from 2006 to 2021
+summary(total_murder_cases_per_year)
+```
+
+I will combine both these tables on year so that I can plot it and visualize the correlation between total shooting cases and murder cases. Also, I will see how cases increased/decreased over the years.
+
+```{r transform_data}
+combined_cases_data <- inner_join(total_shooting_cases_per_year, total_murder_cases_per_year, by="year")
+combined_cases_data$year <- as.numeric(combined_cases_data$year)
+
+combined_cases_data
+
+```
+
+## Including Plots
+
+I have ploted the total shooting cases and murder cases on the graph. 
+
+```{r plot, echo=FALSE}
+combined_cases_data %>%
+ggplot(aes(x=year, y=total_shooting_cases)) +
+geom_line(aes(color="total_shooting_cases")) +
+geom_point(aes(color = "total_shooting_cases")) +
+geom_line(aes(y = total_murder_cases, color="total_murder_cases")) +
+geom_point(aes(y = total_murder_cases, color = "total_murder_cases")) +
+theme(legend.position = "bottom",
+axis.text.x = element_text(angle = 90)) +
+scale_x_continuous(breaks = scales::pretty_breaks(n = 20)) +
+scale_y_continuous(breaks = scales::pretty_breaks(n = 20)) +
+labs(title = "NYPD Shooting Cases", y = NULL)
+```
+
+## Analysis
+From the graph we can see that cases were declining from year 2006 till 2019 but then again shot up to the levels of 2006 in 2020 and 2021. 
+Interesting to note that this was the time of covid epidemic as well during which shooting cases increased.
+Also, there seems to be a linear relationship between shooting cases and murders which is expected.
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Modeling Data
+```{r}
+mod <- lm(total_murder_cases ~ total_shooting_cases, data = combined_cases_data)
+summary(mod)
+
+combined_cases_data_pred <- combined_cases_data %>% mutate(pred = predict(mod))
+combined_cases_data_pred
+
+combined_cases_data_pred %>% ggplot() + 
+     geom_point(aes(x = total_shooting_cases, y=total_murder_cases), color = "blue") +
+     geom_point(aes(x=total_shooting_cases, y=pred), color = "red")
+```
+
+From the model we can see that murder cases follow shootings linearly and our linear model is able to predict murders from shootings with fair accuracy.
+
+## Bias
+I wanted to do a gender and race based analysis as well but based on discussion and situation around race and pronouns in media I refrained from it. I had a doubt if the registered shootings data could have inherent bias for these factors.
