@@ -108,4 +108,4 @@ combined_cases_data_pred %>% ggplot() +
 From the model we can see that murder cases follow shootings linearly and our linear model is able to predict murders from shootings with fair accuracy.
 
 ## Bias
-I had a bias in mind that during covid shooting incidents will decrease due to lockdowns and restricted movements but that was proven wrong. Thin police resources due to focus on covid response and illness could be a source of increase in shooting incidents during Covid.    
+It seems like shooting and murder incidents increased during peak covid pandemic. This could be due to more focus on covid response for police and illness of police personnels in covid. But it could be due to another reason where these incidents are more due to police action and use of fire arms more than usual during pandemic. So it requires further inpection.
