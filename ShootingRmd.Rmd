@@ -27,8 +27,10 @@ url <- "https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DO
 Let's read in the data and explore it
 ```{r import_data, message=FALSE}
 nypd_shooting_data <- read_csv(url)
+nypd_shooting_data
 ```
 
+## Tydying Up and Transforming NYPD Shooting Dataset
 Now that I have explored the data, I would tidy it and store total shooting cases per year and total murder cases per year in a separate data frame. I will only keep year and count data and remove all other columns from it.
 
 ```{r tidy_cases_data}
