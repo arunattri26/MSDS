@@ -11,7 +11,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r load-packages}
+```{r load-packages, warning=FALSE}
 library(tidyverse)
 library(lubridate)
 library(ggplot2)
@@ -27,8 +27,10 @@ url <- "https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DO
 Let's read in the data and explore it
 ```{r import_data, message=FALSE}
 nypd_shooting_data <- read_csv(url)
+nypd_shooting_data
 ```
 
+## Tydying Up and Transforming NYPD Shooting Dataset
 Now that I have explored the data, I would tidy it and store total shooting cases per year and total murder cases per year in a separate data frame. I will only keep year and count data and remove all other columns from it.
 
 ```{r tidy_cases_data}
@@ -106,4 +108,4 @@ combined_cases_data_pred %>% ggplot() +
 From the model we can see that murder cases follow shootings linearly and our linear model is able to predict murders from shootings with fair accuracy.
 
 ## Bias
-I wanted to do a gender and race based analysis as well but based on discussion and situation around race and pronouns in media I refrained from it. I had a doubt if the registered shootings data could have inherent bias for these factors.
+It seems like shooting and murder incidents increased during peak covid pandemic. This could be due to more focus on covid response for police and illness of police personnels in covid. But it could be due to another reason where these incidents are more due to police action and use of fire arms more than usual during pandemic. So it requires further inpection.
