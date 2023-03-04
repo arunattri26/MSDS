@@ -11,7 +11,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r load-packages}
+```{r load-packages, warning=FALSE}
 library(tidyverse)
 library(lubridate)
 library(ggplot2)
